@@ -1,0 +1,90 @@
+#xml-editor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.xml-editor-container {
+  width: 90%;
+  height: 90%;
+  background: #1e1e1e;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.xml-editor-header {
+  padding: 15px 25px;
+  background: #252526;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ccc;
+}
+
+.xml-editor-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.xml-editor-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.xml-editor-actions button {
+  background: #333;
+  border: 1px solid #444;
+  color: #ccc;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.xml-editor-actions button:hover {
+  background: #444;
+  color: #fff;
+}
+
+.xml-editor-actions button.primary {
+  background: #0078d4;
+  border-color: #0078d4;
+  color: white;
+}
+
+.xml-editor-actions button.primary:hover {
+  background: #0086f0;
+}
+
+#xml-editor-content {
+  flex: 1;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: none;
+  padding: 20px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+}
+
+#xml-editor-content:focus {
+  background: #252526;
+}
