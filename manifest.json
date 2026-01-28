@@ -8,7 +8,8 @@
     "storage",
     "activeTab",
     "tabs",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "https://*.lightning.force.com/*",
@@ -17,18 +18,24 @@
   "background": {
     "service_worker": "background.js"
   },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "content_scripts": [
     {
       "matches": [
-        "https://*.lightning.force.com/builder_platform_interaction/flowBuilder.app*"
+        "https://*.lightning.force.com/*"
       ],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
     }
   ],
   "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icons/icon128.png"
+    "default_title": "Open Flow XML Editor"
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -37,8 +44,12 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["editor-overlay.js"],
-      "matches": ["https://*.lightning.force.com/*"]
+      "resources": [
+        "editor-overlay.js"
+      ],
+      "matches": [
+        "https://*.lightning.force.com/*"
+      ]
     }
   ]
 }

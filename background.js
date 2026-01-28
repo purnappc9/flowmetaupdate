@@ -1,9 +1,18 @@
+chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error(error));
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getFlowXml") {
-        handleGetFlowXml(request.flowId, sender.tab.url).then(sendResponse);
-        return true; // Keep message channel open for async response
+        handleGetFlowXml(request.flowId, request.url || sender.tab.url).then(sendResponse);
+        return true;
     } else if (request.action === "saveFlowXml") {
-        handleSaveFlowXml(request.flowId, request.xml, sender.tab.url).then(sendResponse);
+        handleSaveFlowXml(request.flowId, request.xml, request.url || sender.tab.url).then(sendResponse);
+        return true;
+    } else if (request.action === "getCurrentTabUrl") {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            sendResponse({ url: tabs[0].url });
+        });
         return true;
     }
 });
