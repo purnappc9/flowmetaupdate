@@ -3,6 +3,8 @@ console.log("Salesforce Flow XML Editor: Script initialized.");
 function injectButton() {
     // Try several common Salesforce header selectors
     const selectors = [
+        '.slds-builder-toolbar__actions',
+        '.slds-builder-toolbar',
         '.slds-page-header__row_gutters',
         '.slds-page-header__row',
         '.flowdesigner-header', // Legacy/Internal
@@ -20,13 +22,14 @@ function injectButton() {
         }
     }
 
-    // If we can't find a specific header, let's look for the action buttons area
+    // If we can't find a specific header, let's look for known button groups
     if (!header) {
-        header = document.querySelector('.slds-button-group') || document.querySelector('.actions');
+        header = document.querySelector('.slds-button-group') ||
+            document.querySelector('lightning-button-group') ||
+            document.querySelector('.actions');
     }
 
     if (!header) {
-        // console.warn("Salesforce Flow XML Editor: Could not find a suitable injection point.");
         return;
     }
 
@@ -38,7 +41,9 @@ function injectButton() {
     btn.className = 'slds-button slds-button_neutral';
     btn.innerText = 'Edit XML';
     btn.style.marginLeft = '10px';
-    btn.style.border = '2px solid #0070d2'; // Make it pop
+    btn.style.backgroundColor = '#0070d2'; // Salesforce Brand Blue
+    btn.style.color = 'white';
+    btn.style.fontWeight = 'bold';
     btn.onclick = openXmlEditor;
 
     // Append to the first found header/action group
