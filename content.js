@@ -1,4 +1,4 @@
-console.log("Salesforce Flow XML Editor: Script V3 initializing...");
+console.log("Salesforce Flow XML Editor: Script V4 initializing...");
 
 /**
  * Deep search for an element even inside Shadow DOM roots.
@@ -20,23 +20,35 @@ function querySelectorDeep(selector, root = document) {
 function injectButton() {
     if (document.getElementById('edit-flow-xml-btn')) return;
 
-    // Exact selector from user's HTML
-    const targetSelector = '.slds-builder-toolbar__actions';
-    const header = querySelectorDeep(targetSelector);
+    // Expanded selectors based on user feedback and common SF patterns
+    const selectors = [
+        '.navBar-container', // New selector provided by user
+        '.slds-builder-toolbar__actions',
+        '.slds-builder-toolbar',
+        '.flowdesigner-header',
+        '.slds-page-header__row',
+        '.fix_button-group-flexbox'
+    ];
 
-    if (!header) {
-        // console.log("Salesforce Flow XML Editor: Still looking for toolbar...");
-        return;
+    let header = null;
+    for (const sel of selectors) {
+        header = querySelectorDeep(sel);
+        if (header) break;
     }
-
-    console.log("Salesforce Flow XML Editor: Found toolbar! Injecting button...");
 
     const btn = document.createElement('button');
     btn.id = 'edit-flow-xml-btn';
-    btn.className = 'slds-button slds-button_brand'; // Brand blue for visibility
     btn.innerText = 'Edit Flow XML';
-    btn.style.marginLeft = '12px';
-    btn.style.boxShadow = '0 0 10px rgba(0,112,210,0.5)';
+
+    // High-visibility styling
+    btn.style.padding = '8px 16px';
+    btn.style.backgroundColor = '#0070d2';
+    btn.style.color = 'white';
+    btn.style.border = '2px solid white';
+    btn.style.borderRadius = '4px';
+    btn.style.fontWeight = 'bold';
+    btn.style.cursor = 'pointer';
+    btn.style.zIndex = '999999';
 
     btn.onclick = (e) => {
         e.preventDefault();
@@ -44,7 +56,18 @@ function injectButton() {
         openXmlEditor();
     };
 
-    header.appendChild(btn);
+    if (header) {
+        console.log("Salesforce Flow XML Editor: Found injection point, attaching...");
+        btn.style.marginLeft = '12px';
+        header.appendChild(btn);
+    } else {
+        // FALLBACK: If no header found, float it at the top right
+        console.log("Salesforce Flow XML Editor: No header found, using floating fallback.");
+        btn.style.position = 'fixed';
+        btn.style.top = '10px';
+        btn.style.right = '100px';
+        document.body.appendChild(btn);
+    }
 }
 
 function getFlowIdFromUrl() {
@@ -58,7 +81,7 @@ async function openXmlEditor() {
     console.log("Salesforce Flow XML Editor: Opening editor for Flow ID:", flowId);
 
     if (!flowId) {
-        alert("Flow ID not found. Are you in the Flow Builder?");
+        alert("Flow ID not found in URL. Please ensure you are in the Flow Builder.");
         return;
     }
 
@@ -113,7 +136,7 @@ function saveXml(xml) {
 function showLoader() {
     const loader = document.createElement('div');
     loader.id = 'xml-editor-loader';
-    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100000; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;';
+    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000000; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;';
     loader.innerHTML = '<h3>Fetching Flow XML...</h3>';
     document.body.appendChild(loader);
 }
@@ -123,6 +146,8 @@ function hideLoader() {
     if (loader) loader.remove();
 }
 
-// More frequent check for injection
-setInterval(injectButton, 2000);
-console.log("Salesforce Flow XML Editor: Script V3 fully loaded.");
+// Initial run
+setTimeout(injectButton, 3000);
+// Check frequently
+setInterval(injectButton, 5000);
+console.log("Salesforce Flow XML Editor: Script V4 loaded.");
