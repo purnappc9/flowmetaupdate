@@ -1,68 +1,64 @@
-console.log("Salesforce Flow XML Editor: Script initialized.");
+console.log("Salesforce Flow XML Editor: Script V3 initializing...");
 
-function injectButton() {
-    // Try several common Salesforce header selectors
-    const selectors = [
-        '.slds-builder-toolbar__actions',
-        '.slds-builder-toolbar',
-        '.slds-page-header__row_gutters',
-        '.slds-page-header__row',
-        '.flowdesigner-header', // Legacy/Internal
-        '.builder-header-container',
-        'header.slds-global-header_container',
-        '.runtime_salesforce_fluxFlowDesignerStandardHeader' // Specific to Flow Designer
-    ];
+/**
+ * Deep search for an element even inside Shadow DOM roots.
+ */
+function querySelectorDeep(selector, root = document) {
+    let element = root.querySelector(selector);
+    if (element) return element;
 
-    let header = null;
-    for (const selector of selectors) {
-        header = document.querySelector(selector);
-        if (header) {
-            console.log(`Salesforce Flow XML Editor: Found header with selector: ${selector}`);
-            break;
+    const hosts = root.querySelectorAll('*');
+    for (const host of hosts) {
+        if (host.shadowRoot) {
+            element = querySelectorDeep(selector, host.shadowRoot);
+            if (element) return element;
         }
     }
+    return null;
+}
 
-    // If we can't find a specific header, let's look for known button groups
-    if (!header) {
-        header = document.querySelector('.slds-button-group') ||
-            document.querySelector('lightning-button-group') ||
-            document.querySelector('.actions');
-    }
+function injectButton() {
+    if (document.getElementById('edit-flow-xml-btn')) return;
+
+    // Exact selector from user's HTML
+    const targetSelector = '.slds-builder-toolbar__actions';
+    const header = querySelectorDeep(targetSelector);
 
     if (!header) {
+        // console.log("Salesforce Flow XML Editor: Still looking for toolbar...");
         return;
     }
 
-    if (document.getElementById('edit-flow-xml-btn')) return;
+    console.log("Salesforce Flow XML Editor: Found toolbar! Injecting button...");
 
-    console.log("Salesforce Flow XML Editor: Injecting button...");
     const btn = document.createElement('button');
     btn.id = 'edit-flow-xml-btn';
-    btn.className = 'slds-button slds-button_neutral';
-    btn.innerText = 'Edit XML';
-    btn.style.marginLeft = '10px';
-    btn.style.backgroundColor = '#0070d2'; // Salesforce Brand Blue
-    btn.style.color = 'white';
-    btn.style.fontWeight = 'bold';
-    btn.onclick = openXmlEditor;
+    btn.className = 'slds-button slds-button_brand'; // Brand blue for visibility
+    btn.innerText = 'Edit Flow XML';
+    btn.style.marginLeft = '12px';
+    btn.style.boxShadow = '0 0 10px rgba(0,112,210,0.5)';
 
-    // Append to the first found header/action group
+    btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openXmlEditor();
+    };
+
     header.appendChild(btn);
 }
 
 function getFlowIdFromUrl() {
     const url = window.location.href;
-    // Patterns for both 15 and 18 character IDs
     const match = url.match(/[?&]flowId=([a-zA-Z0-9]{15,18})/);
     return match ? match[1] : null;
 }
 
 async function openXmlEditor() {
     const flowId = getFlowIdFromUrl();
-    console.log("Salesforce Flow XML Editor: Target Flow ID:", flowId);
+    console.log("Salesforce Flow XML Editor: Opening editor for Flow ID:", flowId);
 
     if (!flowId) {
-        alert("Flow ID not found in URL. Please ensure you are inside the Flow Builder.");
+        alert("Flow ID not found. Are you in the Flow Builder?");
         return;
     }
 
@@ -91,7 +87,7 @@ function createOverlay(xml) {
           <button id="save-xml-editor" class="primary">Save (Beta)</button>
         </div>
       </div>
-      <textarea id="xml-editor-content" spellcheck="false">${xml}</textarea>
+      <textarea id="xml-editor-content" spellcheck="false" autocomplete="off">${xml}</textarea>
     </div>
   `;
     document.body.appendChild(overlay);
@@ -109,7 +105,7 @@ function saveXml(xml) {
         if (response && response.success) {
             alert("Flow saved successfully!");
         } else {
-            alert("Info: " + (response ? response.error : "Unknown error"));
+            alert("Info: " + (response ? response.error : "Connection Error or API Limitation"));
         }
     });
 }
@@ -117,8 +113,8 @@ function saveXml(xml) {
 function showLoader() {
     const loader = document.createElement('div');
     loader.id = 'xml-editor-loader';
-    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;';
-    loader.innerHTML = '<div style="font-size:20px; color:#0070d2;">Fetching XML...</div>';
+    loader.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100000; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;';
+    loader.innerHTML = '<h3>Fetching Flow XML...</h3>';
     document.body.appendChild(loader);
 }
 
@@ -127,14 +123,6 @@ function hideLoader() {
     if (loader) loader.remove();
 }
 
-// Observe for DOM changes as Flow Builder is a SPA
-const observer = new MutationObserver(() => {
-    injectButton();
-});
-observer.observe(document.body, { childList: true, subtree: true });
-
-// Also try periodic check in case observer misses it
-setInterval(injectButton, 3000);
-
-// Initial run
-injectButton();
+// More frequent check for injection
+setInterval(injectButton, 2000);
+console.log("Salesforce Flow XML Editor: Script V3 fully loaded.");
